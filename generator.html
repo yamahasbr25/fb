@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral LP Generator Tool - SEO & Ads Optimized</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f4f6f7;
+            color: #333;
+            padding: 40px 20px;
+        }
+        .wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            border-color: #2c3e50;
+            outline: none;
+        }
+        textarea {
+            height: 300px;
+            resize: vertical;
+        }
+        .note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .recommendation-box {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #e8f4f8;
+            border-left: 4px solid #2980b9;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .recommendation-box a {
+            color: #2980b9;
+            font-weight: 700;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .recommendation-box a:hover {
+            text-decoration: underline;
+            color: #1c5980;
+        }
+        button {
+            width: 100%;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        footer-tool {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h2>Landing Page (LP) Viral Generator</h2>
+    
+    <div class="form-group">
+        <label for="keyword">Keyword / Slug Utama:</label>
+        <input type="text" id="keyword" placeholder="Contoh: woman finds hidden safe" autocomplete="off">
+        <div class="note">Akan digunakan sebagai URL dan dasar pencarian Related Posts.</div>
+        
+        <div id="rec-box" class="recommendation-box">
+            Preview URL: <br>
+            <a href="#" id="rec-link" target="_blank">-</a>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="image-url">URL Gambar Utama (Manual):</label>
+        <input type="url" id="image-url" placeholder="Contoh: https://images.unsplash.com/photo-xxx..." autocomplete="off">
+        <div class="note">Gambar ini akan tampil tepat di bawah Judul (H1) dan menjadi thumbnail share (OG Image).</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="content">Isi Artikel:</label>
+        <textarea id="content" placeholder="Baris Paling Atas Pasti Judul Artikel H1&#10;&#10;Paragraf Pertama ditulis di sini...&#10;&#10;Paragraf Kedua ditulis di sini...&#10;&#10;Dan seterusnya..."></textarea>
+        <div class="note">Penting: Iklan Ad2 otomatis diselipkan di bawah paragraf pertama!</div>
+    </div>
+    
+    <button onclick="generateAndDownload()">Generate & Download HTML LP</button>
+    
+    <footer-tool>&copy; 2026 Viral LP Automation Suite</footer-tool>
+</div>
+
+<script>
+let baseDomain = "https://yourviralwebsite.com/"; 
+
+// Fetch domain from domain.txt if exists
+fetch('domain.txt')
+    .then(response => response.text())
+    .then(data => {
+        let domain = data.trim();
+        if (domain) {
+            domain = domain.replace(/\[.*?\]\s*/g, '').replace(/\s*/gi, '').trim(); 
+            if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+                domain = 'https://' + domain;
+            }
+            if (!domain.endsWith('/')) {
+                domain += '/';
+            }
+            baseDomain = domain;
+        }
+    })
+    .catch(err => console.log('File domain.txt tidak ditemukan, menggunakan domain default.'));
+
+const keywordInput = document.getElementById('keyword');
+const recBox = document.getElementById('rec-box');
+const recLink = document.getElementById('rec-link');
+
+// Update preview URL based on Keyword
+keywordInput.addEventListener('input', function() {
+    const keywordText = this.value.trim();
+    if (keywordText.length > 0) {
+        const slug = keywordText.toLowerCase()
+                                .replace(/\s+/g, '-')
+                                .replace(/[^a-z0-9-]/g, '')
+                                .replace(/-+/g, '-');
+        const fullUrl = baseDomain + slug;
+        recLink.href = fullUrl;
+        recLink.textContent = fullUrl;
+        recBox.style.display = 'block';
+    } else {
+        recBox.style.display = 'none';
+    }
+});
+
+function generateAndDownload() {
+    const keywordInputVal = document.getElementById('keyword').value.trim();
+    const imageUrlVal = document.getElementById('image-url').value.trim();
+    const contentInput = document.getElementById('content').value.trim();
+    
+    if (!keywordInputVal || !contentInput || !imageUrlVal) {
+        alert('Mohon isi semua kolom: Keyword, URL Gambar, dan Isi Artikel!');
+        return;
+    }
+    
+    const keywordSlug = keywordInputVal.toLowerCase()
+                                    .replace(/\s+/g, '-')
+                                    .replace(/[^a-z0-9-]/g, '')
+                                    .replace(/-+/g, '-');
+    const fileName = keywordSlug + '.html';
+    const targetFullUrl = baseDomain + keywordSlug;
+    
+    const lines = contentInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    if (lines.length < 2) {
+        alert('Isi artikel minimal harus ada Judul (H1) dan 1 Paragraf!');
+        return;
+    }
+    
+    const h1Title = lines[0]; 
+    const remainingParagraphs = lines.slice(1);
+    
+    let articleBodyHtml = '';
+    
+    // Menyusun paragraf dan menyelipkan Ad2 di bawah paragraf pertama
+    remainingParagraphs.forEach((paragraphText, index) => {
+        articleBodyHtml += `<p>${paragraphText}</p>\n`;
+        // Selipkan ad2.js di bawah paragraf index ke-0 (paragraf pertama)
+        if (index === 0) {
+            articleBodyHtml += `        <center style="margin: 20px 0;"><script src="https://seribudollarperhari.github.io/banner/ad2.js"><\/script></center>\n        `;
+        }
+    });
+    
+    const metaDesc = remainingParagraphs[0] ? remainingParagraphs[0].substring(0, 150) + '...' : h1Title;
+    
+    // TEMPLATE FINAL HTML
+    const finalHtmlOutput = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta property="og:url" content="${targetFullUrl}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="${h1Title}">
+    <meta property="og:description" content="${metaDesc}">
+    <meta property="og:image" content="${imageUrlVal}">
+    <meta property="og:site_name" content="Viral Daily News">
+    
+    <title>${h1Title}</title>
+
+    <style>
+        :root {
+            --fb-color: #1877F2;
+            --x-color: #000000;
+            --reddit-color: #FF4500;
+            --wa-color: #25D366;
+            --text-color: #222222;
+            --bg-color: #ffffff;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: #f4f6f7;
+            margin: 0;
+            padding: 0; 
+        }
+
+        .article-container {
+            max-width: 680px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px 15px 40px 15px; 
+            min-height: 100vh;
+            box-shadow: 0 0 15px rgba(0,0,0,0.03);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            line-height: 1.25;
+            margin-top: 15px; 
+            margin-bottom: 20px;
+            color: #111;
+            font-weight: 800;
+        }
+
+        img.hero-image {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0 25px 0;
+        }
+
+        p { font-size: 1.15rem; margin-bottom: 22px; }
+
+        /* AREA TOMBOL SHARE */
+        .share-section { margin-top: 25px; margin-bottom: 30px; }
+        .share-buttons-grid { width: 100%; overflow: hidden; border-radius: 8px; }
+        .btn-share { float: left; width: 25%; aspect-ratio: 2 / 1; position: relative; transition: opacity 0.2s; }
+        .btn-share:hover { opacity: 0.85; }
+        .btn-share svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 45%; width: auto; fill: #ffffff; }
+        .btn-fb { background-color: var(--fb-color); }
+        .btn-x { background-color: var(--x-color); }
+        .btn-reddit { background-color: var(--reddit-color); }
+        .btn-wa { background-color: var(--wa-color); }
+
+        /* RELATED POSTS GRID CSS */
+        .related-posts-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        .related-posts-section h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: #111;
+            font-weight: 800;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .content-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s;
+        }
+        .content-card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .content-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            margin: 0;
+            border-radius: 0;
+        }
+        .content-card-body { padding: 12px; }
+        .content-card-body h3 {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        /* POPUP IN-APP BROWSER (OVERLAY) */
+        #inapp-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.96);
+            z-index: 99999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            color: #fff;
+        }
+        #inapp-overlay h2 { color: #ffcc00; font-size: 1.8rem; margin-bottom: 15px; }
+        #inapp-overlay p { font-size: 1.2rem; line-height: 1.6; }
+        .icon-dots {
+            font-size: 2rem;
+            font-weight: bold;
+            background: #333;
+            padding: 5px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.7rem; }
+            p { font-size: 1.05rem; }
+            .content-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .content-card img { height: 100px; }
+            .content-card-body h3 { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    
+    <center><script src="https://seribudollarperhari.github.io/banner/ad1.js"><\/script></center>
+
+    <main class="article-container">
+        
+        <h1>${h1Title}</h1>
+        
+        <img class="hero-image" src="${imageUrlVal}" alt="${h1Title}">
+        
+        <article>
+            ${articleBodyHtml}
+        </article>
+
+        <section class="share-section">
+            <div class="share-buttons-grid">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(targetFullUrl)}" target="_blank" class="btn-share btn-fb" title="Share on Facebook">
+                    <svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.8z"/></svg>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(targetFullUrl)}" target="_blank" class="btn-share btn-x" title="Share on X">
+                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://reddit.com/submit?url=${encodeURIComponent(targetFullUrl)}" target="_blank" class="btn-share btn-reddit" title="Share on Reddit">
+                    <svg viewBox="0 0 24 24"><path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.75-1.64-5.99-1.72l1.23-3.91 3.97.86a2 2 0 1 0 1.97-1.47c0-1.1-.9-2-2-2a1.99 1.99 0 0 0-1.84 1.24l-4.51-1a.49.49 0 0 0-.57.36l-1.39 4.43c-2.31.06-4.5.7-6.19 1.73-.55-.74-1.44-1.21-2.43-1.21-1.65 0-3 1.35-3 3 0 1.12.63 2.1 1.56 2.6-.04.29-.06.58-.06.88 0 3.86 4.48 7 10 7s10-3.14 10-7c0-.3-.02-.59-.06-.87.93-.5 1.56-1.48 1.56-2.61zM5.31 14.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm11.33 4.2c-1.34 1.34-3.89 1.45-4.64 1.45-.75 0-3.3-.11-4.64-1.45a.49.49 0 1 1 .69-.69c1.01 1.01 3.03 1.15 3.95 1.15.92 0 2.94-.14 3.95-1.15a.49.49 0 1 1 .69.69zm-1.64-2.2c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                </a>
+                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(h1Title + " - " + targetFullUrl)}" target="_blank" class="btn-share btn-wa" title="Share on WhatsApp">
+                    <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-3.535l.393.233c1.492.886 3.16 1.353 4.964 1.354 5.542 0 10.051-4.51 10.054-10.055.002-2.686-1.043-5.212-2.943-7.114C17.156 2.98 14.634 1.932 11.95 1.932c-5.544 0-10.056 4.512-10.06 10.06-.001 1.83.479 3.619 1.392 5.147l.256.429-.998 3.645 3.73-.977zm11.314-5.174c-.312-.156-1.848-.912-2.126-1.013-.279-.102-.482-.156-.684.156-.202.311-.78.983-.956 1.186-.176.203-.352.228-.664.072-1.344-.672-2.219-1.161-3.111-2.692-.23-.396.23-.367.659-1.222.072-.145.036-.272-.018-.38-.055-.107-.482-1.16-.66-1.589-.173-.417-.348-.36-.482-.367-.124-.006-.266-.007-.408-.007-.141 0-.372.053-.567.266-.194.213-.744.727-.744 1.774 0 1.046.762 2.058.868 2.201.107.143 1.5 2.293 3.635 3.218.508.22 1.03.353 1.385.466.51.162.974.139 1.341.084.409-.061 1.848-.755 2.11-1.442.262-.688.262-1.277.184-1.392-.078-.115-.286-.17-.597-.327z"/></svg>
+                </a>
+            </div>
+        </section>
+
+        <center><script src="https://seribudollarperhari.github.io/banner/ad3.js"><\/script></center>
+        
+        <section class="related-posts-section">
+            <h3>More Viral Stories</h3>
+            <div id="related-posts-container" class="content-grid">
+                </div>
+        </section>
+
+        <div style="margin-top: 30px;">
+            <center><script src="https://seribudollarperhari.github.io/banner/nativ.js"><\/script></center>
+        </div>
+
+    </main>
+
+    <div id="inapp-overlay">
+        <h2>Action Required</h2>
+        <p>For the best reading experience and to view the full media, please open this page in your native browser.</p>
+        <p>Tap the menu icon on the top right corner:</p>
+        <div class="icon-dots">⋮</div>
+        <p>And select <strong>"Open in Browser"</strong> or <strong>"Open in Chrome/Safari"</strong>.</p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
+            if (isInAppBrowser) {
+                setTimeout(() => {
+                    const overlay = document.getElementById('inapp-overlay');
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden'; 
+                }, 3000);
+            }
+        });
+    <\/script>
+
+    <script>
+        (function() {
+            const keyword = "${h1Title}";
+            const displayed = new Set([keyword.toLowerCase()]);
+            
+            function generateRelated() {
+                const script = document.createElement('script');
+                script.src = 'https://suggestqueries.google.com/complete/search?client=youtube&jsonp=handleRelatedSuggest&hl=en&q=' + encodeURIComponent(keyword);
+                document.head.appendChild(script);
+                script.onload = () => script.remove();
+                script.onerror = () => loadFallback();
+            }
+
+            window.handleRelatedSuggest = function(data) {
+                const suggestions = data[1];
+                if (!suggestions || suggestions.length === 0) {
+                    loadFallback();
+                    return;
+                }
+                renderPosts(suggestions.map(item => typeof item === 'string' ? item : item[0]));
+            };
+
+            function loadFallback() {
+                fetch('keyword.txt')
+                    .then(res => res.text())
+                    .then(data => {
+                        const keywords = data.split('\\n').map(k => k.trim()).filter(k => k.length > 0);
+                        for (let i = keywords.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [keywords[i], keywords[j]] = [keywords[j], keywords[i]];
+                        }
+                        renderPosts(keywords);
+                    })
+                    .catch(e => console.log('Silakan siapkan file keyword.txt di hosting untuk fallback.'));
+            }
+
+            function renderPosts(items) {
+                const container = document.getElementById('related-posts-container');
+                if (!container) return;
+                
+                let html = '';
+                let count = 0;
+                
+                items.forEach(item => {
+                    if(count >= 6) return; // Load 6 related posts
+                    
+                    const termLower = item.toLowerCase();
+                    if(displayed.has(termLower)) return;
+                    displayed.add(termLower);
+                    count++;
+                    
+                    const slug = item.replace(/\\s+/g, '-').toLowerCase();
+                    const linkUrl = '${baseDomain}' + slug + '.html'; // Bisa diganti sesuaikan dengan routing detail
+                    
+                    const queryImg = item + " news viral";
+                    const imgUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImg) + '&w=300&h=200&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
+                    
+                    const titleCased = item.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    
+                    html += '<a href="' + linkUrl + '" class="content-card"><img src="' + imgUrl + '" alt="' + titleCased + '" loading="lazy"><div class="content-card-body"><h3>' + titleCased + '</h3></div></a>';
+                });
+                
+                container.innerHTML = html;
+            }
+
+            generateRelated();
+        })();
+    <\/script>
+</body>
+</html>`;
+
+    // Download Logic
+    const blob = new Blob([finalHtmlOutput], { type: 'text/html;charset=utf-8;' });
+    const link = document.createElement("a");
+    
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
+
+</body>
+</html>
