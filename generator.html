@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viral LP Generator Tool - SEO & Ads Optimized</title>
+    <title>Viral LP Generator Tool - Fixed & Optimized</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
         
@@ -114,7 +114,7 @@
     <div class="form-group">
         <label for="keyword">Keyword / Slug Utama:</label>
         <input type="text" id="keyword" placeholder="Contoh: woman finds hidden safe" autocomplete="off">
-        <div class="note">Akan digunakan sebagai URL dan dasar pencarian Related Posts.</div>
+        <div class="note">Akan digunakan sebagai URL dan dasar pencarian Related Posts. (Jangan gunakan tanda kutip)</div>
         
         <div id="rec-box" class="recommendation-box">
             Preview URL: <br>
@@ -131,7 +131,7 @@
     <div class="form-group">
         <label for="content">Isi Artikel:</label>
         <textarea id="content" placeholder="Baris Paling Atas Pasti Judul Artikel H1&#10;&#10;Paragraf Pertama ditulis di sini...&#10;&#10;Paragraf Kedua ditulis di sini...&#10;&#10;Dan seterusnya..."></textarea>
-        <div class="note">Penting: Iklan Ad2 otomatis diselipkan di bawah paragraf pertama!</div>
+        <div class="note">Penting: Iklan Ad2 otomatis diselipkan di bawah paragraf pertama! (Tidak perlu mem-paste teks artikel Hidden SEO, sistem sudah menanamnya secara otomatis)</div>
     </div>
     
     <button onclick="generateAndDownload()">Generate & Download HTML LP</button>
@@ -142,7 +142,6 @@
 <script>
 let baseDomain = "https://yourviralwebsite.com/"; 
 
-// Fetch domain from domain.txt if exists
 fetch('domain.txt')
     .then(response => response.text())
     .then(data => {
@@ -164,15 +163,17 @@ const keywordInput = document.getElementById('keyword');
 const recBox = document.getElementById('rec-box');
 const recLink = document.getElementById('rec-link');
 
-// Update preview URL based on Keyword
+// PERBAIKAN PREVIEW URL: Memastikan spasi terbaca, regex disempurnakan & penambahan .html
 keywordInput.addEventListener('input', function() {
     const keywordText = this.value.trim();
     if (keywordText.length > 0) {
         const slug = keywordText.toLowerCase()
-                                .replace(/\s+/g, '-')
-                                .replace(/[^a-z0-9-]/g, '')
-                                .replace(/-+/g, '-');
-        const fullUrl = baseDomain + slug;
+                                .replace(/[^a-z0-9\s-]/g, '') // Hanya izinkan huruf, angka, spasi, strip
+                                .replace(/\s+/g, '-') // Spasi jadi strip
+                                .replace(/-+/g, '-') // Strip ganda jadi satu strip
+                                .replace(/^-+|-+$/g, ''); // Hapus strip di awal dan akhir
+                                
+        const fullUrl = baseDomain + slug + ".html"; // Ditambahkan ekstensi agar URL valid diclick
         recLink.href = fullUrl;
         recLink.textContent = fullUrl;
         recBox.style.display = 'block';
@@ -192,11 +193,13 @@ function generateAndDownload() {
     }
     
     const keywordSlug = keywordInputVal.toLowerCase()
+                                    .replace(/[^a-z0-9\s-]/g, '')
                                     .replace(/\s+/g, '-')
-                                    .replace(/[^a-z0-9-]/g, '')
-                                    .replace(/-+/g, '-');
+                                    .replace(/-+/g, '-')
+                                    .replace(/^-+|-+$/g, '');
+                                    
     const fileName = keywordSlug + '.html';
-    const targetFullUrl = baseDomain + keywordSlug;
+    const targetFullUrl = baseDomain + keywordSlug + '.html';
     
     const lines = contentInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     
@@ -205,21 +208,63 @@ function generateAndDownload() {
         return;
     }
     
-    const h1Title = lines[0]; 
+    // SANITASI JUDUL: Mencegah kode HTML/Kutipan merusak struktur Meta & Head!
+    const rawH1Title = lines[0]; 
+    const textOnlyH1Title = rawH1Title.replace(/<[^>]*>?/gm, ''); // Hapus tag HTML bocor
+    const htmlSafeTitle = textOnlyH1Title.replace(/"/g, '&quot;'); // Aman untuk tag Meta
+    const jsSafeTitle = textOnlyH1Title.replace(/"/g, '\\"').replace(/'/g, "\\'"); // Aman untuk Script
+    
     const remainingParagraphs = lines.slice(1);
     
-    let articleBodyHtml = '';
+    // TRICK PENCEGAH KODE MUNCUL DI ATAS POST: Pisahkan script tags
+    const tagScript = '<scr' + 'ipt type="text/javascript" src="';
+    const tagClose = '"></scr' + 'ipt>';
+    const inlineScriptOpen = '<scr' + 'ipt>';
+    const inlineScriptClose = '</scr' + 'ipt>';
     
-    // Menyusun paragraf dan menyelipkan Ad2 di bawah paragraf pertama
+    // KEMBALIKAN HIDDEN SEO TEXT SECARA OTOMATIS
+    const hiddenSeoText = `<div style="display:none; visibility:hidden;">
+            <h1>The Ultimate Guide to Making Money Online: Wealth Creation Through Trading and Cryptocurrency</h1>
+            <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry. Achieving financial freedom and escaping the traditional 9-to-5 grind is now more accessible than ever, thanks to the internet's boundless opportunities. Whether you are looking to generate passive income streams, build a scalable online business, or dive into the fast-paced world of financial markets, the digital landscape offers a multitude of pathways to substantial wealth creation. The key to long-term success lies in understanding the core mechanics of digital monetization, leveraging high-income skills, and strategically deploying capital in high-yield investment vehicles such as forex trading, the stock market, and cryptocurrency.</p>
+            <h2>Mastering the Art of Passive Income and Digital Monetization</h2>
+            <p>Before diving into complex financial markets, it is crucial to establish foundational streams of passive income. Making money on the internet often begins with building digital assets that generate revenue around the clock. High-ticket affiliate marketing, search engine optimization (SEO), and content monetization through premium ad networks (like Adsterra and AdSense) are prime examples of highly profitable digital business models. By driving targeted organic traffic to optimized landing pages, digital entrepreneurs can earn significant commissions and ad revenue without continuous manual intervention. Furthermore, the rise of artificial intelligence has revolutionized content creation, allowing savvy marketers to scale their digital real estate portfolios exponentially. Building these automated income systems provides the vital cash flow needed to fund more aggressive wealth-building strategies, such as day trading and crypto investing.</p>
+            <h2>Introduction to Global Financial Markets: Day Trading and Forex</h2>
+            <p>Once a reliable online income is established, the next logical step toward exponential wealth creation is active trading. Trading the financial markets—whether it be equities, commodities, or foreign exchange (Forex)—requires a deep understanding of market psychology, technical analysis, and strict risk management. Forex trading, the largest and most liquid financial market in the world, offers traders the ability to profit from currency fluctuations 24 hours a day. Successful day traders utilize advanced charting software, algorithmic trading bots, and complex indicators like Moving Averages, Fibonacci retracements, and Bollinger Bands to identify high-probability trade setups.</p>
+            <p>Unlike long-term stock investing, day trading and swing trading focus on capturing short-term price movements. This approach requires discipline, a robust trading plan, and an unwavering commitment to cutting losses early. Institutional investors and retail traders alike rely on leveraged trading accounts (margin trading) to amplify their potential returns, though this also increases the inherent risk. Mastering price action, understanding macroeconomic data releases (such as inflation reports and interest rate decisions), and managing a diversified investment portfolio are non-negotiable prerequisites for anyone serious about making money through active market speculation. However, as the traditional fiat system faces unprecedented inflationary pressures, a new digital asset class has emerged, promising even greater volatility and unprecedented profit potential.</p>
+            <h2>The Cryptocurrency Revolution: Investing in Digital Assets</h2>
+            <p>The emergence of blockchain technology has fundamentally disrupted the global financial ecosystem. Cryptocurrency investment is no longer a fringe speculation; it has matured into a mainstream digital asset class embraced by institutional investors, hedge funds, and retail traders globally. Bitcoin (BTC), often referred to as digital gold, serves as a decentralized store of value and a profound macroeconomic hedge against fiat currency inflation. Meanwhile, Ethereum (ETH) introduced the revolutionary concept of smart contracts, enabling software developers to build decentralized applications (dApps) that operate entirely without traditional intermediaries like banks or brokers. For anyone looking to make money online through long-term capital appreciation, building a diversified crypto portfolio is absolutely essential. Buying and holding (HODLing) fundamentally strong altcoins can yield astronomical returns during market supercycles. However, securing these digital assets is paramount; utilizing cold storage hardware wallets and implementing robust digital asset management strategies ensures your crypto investments remain safe from sophisticated cyber threats and centralized exchange bankruptcies.</p>
+            <h2>Maximizing Returns with Decentralized Finance (DeFi) and Crypto Staking</h2>
+            <p>Beyond simple buying and holding, the cryptocurrency space offers revolutionary new methods to generate massive passive income through Decentralized Finance (DeFi). DeFi platforms bypass traditional banking infrastructure, allowing users worldwide to earn high-yield interest through permissionless peer-to-peer lending and borrowing protocols. Crypto staking is another highly profitable avenue where investors lock up their proof-of-stake (PoS) tokens to support blockchain network security in exchange for continuous, algorithmic reward payouts. Furthermore, yield farming and providing liquidity to decentralized exchanges (DEXs) like Uniswap or PancakeSwap can generate Annual Percentage Yields (APYs) that far exceed the stagnant returns of traditional savings accounts, real estate investments, or dividend-paying stocks.</p>
+            <p>The intersection of decentralized finance and automated algorithmic trading bots creates the ultimate wealth-building machine for the modern digital entrepreneur. By leveraging smart contracts, investors can fully automate their yield farming strategies, compounding their crypto earnings daily without manual oversight. Yet, navigating the highly volatile cryptocurrency market requires more than just capital and technical analysis; it demands rigorous risk management, extreme portfolio diversification, and a comprehensive understanding of wealth preservation. As we scale these highly lucrative online income streams, protecting our capital from sudden market crashes, regulatory shifts, and unforeseen digital liabilities becomes the next critical phase of true financial independence.</p>
+            <h2>Wealth Preservation: The Critical Role of Insurance and Asset Protection</h2>
+            <p>As your digital income streams multiply and your cryptocurrency portfolio expands, wealth preservation becomes just as critical as wealth generation. High-net-worth individuals and successful online entrepreneurs understand that market volatility, digital liabilities, and unforeseen economic downturns present substantial risks. Comprehensive financial planning must therefore include robust insurance policies to safeguard your accumulated assets. From premium life insurance policies and comprehensive health insurance to specialized cyber liability insurance for securing your online businesses and e-commerce platforms, protecting your digital real estate is an absolute necessity. Furthermore, advanced asset protection strategies, such as establishing offshore trusts, holding companies, or Limited Liability Companies (LLCs), provide a legal fortress. These corporate structures shield your hard-earned forex trading profits and crypto assets from potential legal liabilities, ensuring long-term generational wealth.</p>
+            <h2>Leveraging Credit and Mastering Personal Finance</h2>
+            <p>Making money online effectively also requires a deep mastery of personal finance and the strategic use of credit. Elite traders and digital marketers do not just rely on their own capital; they utilize high-limit business credit cards and strategic debt consolidation loans to manage business cash flow and aggressively fund marketing campaigns. Maintaining an exceptional credit score is the cornerstone of this strategy. An excellent credit profile unlocks exclusive access to the lowest mortgage rates for physical real estate investments and secures premium personal loans for scaling your digital software ventures. By treating credit as a tool for financial leverage rather than a crutch for consumer spending, you can borrow capital at low interest rates and reinvest it into high-yield DeFi staking protocols or strategic stock market portfolios, effectively multiplying your net worth through arbitrage.</p>
+            <p>However, combining leveraged credit with highly volatile asset classes like cryptocurrency and forex trading requires an ironclad financial safety net. Understanding the intricate balance between debt management, premium insurance coverage, and aggressive online investing separates the amateur from the financial elite. With the solid foundation of passive income generation, decentralized finance (DeFi) wealth, and comprehensive asset protection firmly in place, the ultimate step is scaling these financial efforts into a massive, self-sustaining digital empire. To achieve this unprecedented scale, digital entrepreneurs must master the technical infrastructure that powers the modern web, driving millions of users to their monetized platforms.</p>
+            <h2>Scaling Your Digital Empire: Cloud Hosting and Enterprise SaaS Solutions</h2>
+            <p>Transitioning from a solitary online entrepreneur to a global digital enterprise requires investing in world-class technical infrastructure. Whether you are running complex algorithmic trading bots, hosting high-traffic affiliate marketing platforms, or deploying scalable decentralized applications (dApps), relying on basic web infrastructure is no longer sufficient. Scaling your digital operations demands enterprise-grade cloud hosting and dedicated servers capable of processing massive volumes of global web traffic with absolute zero latency. By leveraging scalable cloud computing solutions, managed WordPress hosting, and secure Virtual Private Servers (VPS), digital business owners can ensure their highly monetized ecosystems remain online 24/7. Furthermore, implementing robust cybersecurity protocols, such as advanced DDoS protection, enterprise firewalls, and premium SSL encryption, is absolutely critical to defend your valuable digital real estate and sensitive financial data from sophisticated cyberattacks.</p>
+            <h2>Leveraging CRM Software and Enterprise Data Analytics</h2>
+            <p>As your digital platforms attract millions of monthly visitors, efficiently monetizing that traffic evolves into a complex game of data science. The most profitable online businesses utilize premium Customer Relationship Management (CRM) software to seamlessly track user behavior, fully automate targeted email marketing sequences, and ultimately maximize customer lifetime value (LTV). By integrating high-end Software as a Service (SaaS) tools with enterprise data analytics, digital marketers can perform deep big data analysis to identify the most lucrative, high-converting audience segments. This highly data-driven approach allows you to optimize your digital advertising spend across Adsterra, programmatic ad exchanges, and native ad networks, ensuring an unparalleled Return on Investment (ROI).</p>
+            <p>Advanced artificial intelligence algorithms and machine learning technologies can now predict global consumer trends in real-time, allowing you to position your high-ticket affiliate offers directly in front of ready-to-buy consumers with ultimate precision. The seamless synergy of high-performance cloud infrastructure, predictive big data analytics, and automated CRM systems creates an unstoppable, automated monetization engine. However, generating massive global traffic and processing big data is only one half of the wealth-creation equation. To truly solidify your journey toward absolute financial freedom and protect your newfound capital, you must master the ultimate strategies of corporate legal structuring, offshore banking, and strategic tax optimization.</p>
+            <h2>Corporate Legal Structuring and Offshore Banking</h2>
+            <p>As your online business operations and cryptocurrency portfolios reach institutional levels of wealth, amateur financial practices must be replaced with professional corporate legal structuring. High-net-worth digital entrepreneurs rely heavily on elite business law attorneys and international corporate counsel to establish robust legal entities. Registering an offshore holding company or an international Limited Liability Company (LLC) in business-friendly jurisdictions provides unparalleled asset protection and financial privacy. Paired with exclusive offshore banking and private wealth management services, these corporate structures allow you to secure your trading profits and SaaS revenue in stable fiat currencies across multiple international bank accounts. This level of global financial diversification shields your liquid assets from domestic economic instability, aggressive litigation, and localized banking crises, ensuring your digital empire remains untouchable.</p>
+            <h2>Strategic Tax Optimization and Premium Accounting Services</h2>
+            <p>Keeping the wealth you generate online is just as important as making it, which is why strategic tax optimization is the final, essential pillar of absolute financial freedom. Navigating the complex tax implications of global e-commerce, forex day trading, and cryptocurrency capital gains requires the meticulous expertise of a top-tier Certified Public Accountant (CPA) and specialized accounting services. Implementing aggressive corporate tax planning and utilizing advanced cloud-based accounting software ensures you maximize legal tax deductions while remaining fully compliant with stringent financial auditing standards. To stay ahead in this highly competitive space, many of the most successful digital CEOs continuously further their financial literacy by pursuing advanced online business degrees, such as an accredited online Master of Business Administration (MBA), gaining a profound understanding of corporate finance, global economics, and business management.</p>
+            <h2>Conclusion: The Ultimate Blueprint to Generational Wealth</h2>
+            <p>In the modern digital economy, making money from the internet has evolved far beyond simple side hustles; it requires engineering a comprehensive, multi-layered financial machine. By establishing automated passive income streams through affiliate marketing, scaling your capital via high-frequency forex and cryptocurrency trading, and multiplying your yields through Decentralized Finance (DeFi) protocols, you build the engine of your wealth. Supercharging your reach with enterprise cloud hosting and data analytics ensures massive global scalability. Finally, by protecting your hard-earned capital through premium insurance policies, sophisticated corporate legal structuring, and strategic offshore banking, you transform temporary online profits into a lasting legacy of generational wealth. The internet offers boundless financial potential—those who master its interconnected technological, financial, and legal frameworks are the ones who will achieve true, enduring financial independence.</p>
+        </div>\n`;
+
+    let articleBodyHtml = hiddenSeoText;
+    
+    // Menyusun paragraf dan menyelipkan Ad2 di bawah paragraf pertama (dengan aman)
     remainingParagraphs.forEach((paragraphText, index) => {
         articleBodyHtml += `<p>${paragraphText}</p>\n`;
-        // Selipkan ad2.js di bawah paragraf index ke-0 (paragraf pertama)
         if (index === 0) {
-            articleBodyHtml += `        <center style="margin: 20px 0;"><script src="https://seribudollarperhari.github.io/banner/ad2.js"><\/script></center>\n        `;
+            articleBodyHtml += `        <center style="margin: 20px 0;">${tagScript}https://seribudollarperhari.github.io/banner/ad2.js${tagClose}</center>\n        `;
         }
     });
     
-    const metaDesc = remainingParagraphs[0] ? remainingParagraphs[0].substring(0, 150) + '...' : h1Title;
+    const metaDesc = remainingParagraphs[0] ? remainingParagraphs[0].substring(0, 150).replace(/"/g, '&quot;') + '...' : htmlSafeTitle;
     
     // TEMPLATE FINAL HTML
     const finalHtmlOutput = `<!DOCTYPE html>
@@ -230,12 +275,12 @@ function generateAndDownload() {
     
     <meta property="og:url" content="${targetFullUrl}">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="${h1Title}">
+    <meta property="og:title" content="${htmlSafeTitle}">
     <meta property="og:description" content="${metaDesc}">
     <meta property="og:image" content="${imageUrlVal}">
     <meta property="og:site_name" content="Viral Daily News">
     
-    <title>${h1Title}</title>
+    <title>${htmlSafeTitle}</title>
 
     <style>
         :root {
@@ -287,7 +332,6 @@ function generateAndDownload() {
 
         p { font-size: 1.15rem; margin-bottom: 22px; }
 
-        /* AREA TOMBOL SHARE */
         .share-section { margin-top: 25px; margin-bottom: 30px; }
         .share-buttons-grid { width: 100%; overflow: hidden; border-radius: 8px; }
         .btn-share { float: left; width: 25%; aspect-ratio: 2 / 1; position: relative; transition: opacity 0.2s; }
@@ -298,7 +342,6 @@ function generateAndDownload() {
         .btn-reddit { background-color: var(--reddit-color); }
         .btn-wa { background-color: var(--wa-color); }
 
-        /* RELATED POSTS GRID CSS */
         .related-posts-section {
             margin-top: 30px;
             padding-top: 30px;
@@ -342,7 +385,6 @@ function generateAndDownload() {
             font-weight: 600;
         }
 
-        /* POPUP IN-APP BROWSER (OVERLAY) */
         #inapp-overlay {
             display: none; 
             position: fixed;
@@ -381,13 +423,13 @@ function generateAndDownload() {
 </head>
 <body>
     
-    <center><script src="https://seribudollarperhari.github.io/banner/ad1.js"><\/script></center>
+    <center>${tagScript}https://seribudollarperhari.github.io/banner/ad1.js${tagClose}</center>
 
     <main class="article-container">
         
-        <h1>${h1Title}</h1>
+        <h1>${textOnlyH1Title}</h1>
         
-        <img class="hero-image" src="${imageUrlVal}" alt="${h1Title}">
+        <img class="hero-image" src="${imageUrlVal}" alt="${htmlSafeTitle}">
         
         <article>
             ${articleBodyHtml}
@@ -404,22 +446,23 @@ function generateAndDownload() {
                 <a href="https://reddit.com/submit?url=${encodeURIComponent(targetFullUrl)}" target="_blank" class="btn-share btn-reddit" title="Share on Reddit">
                     <svg viewBox="0 0 24 24"><path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.75-1.64-5.99-1.72l1.23-3.91 3.97.86a2 2 0 1 0 1.97-1.47c0-1.1-.9-2-2-2a1.99 1.99 0 0 0-1.84 1.24l-4.51-1a.49.49 0 0 0-.57.36l-1.39 4.43c-2.31.06-4.5.7-6.19 1.73-.55-.74-1.44-1.21-2.43-1.21-1.65 0-3 1.35-3 3 0 1.12.63 2.1 1.56 2.6-.04.29-.06.58-.06.88 0 3.86 4.48 7 10 7s10-3.14 10-7c0-.3-.02-.59-.06-.87.93-.5 1.56-1.48 1.56-2.61zM5.31 14.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm11.33 4.2c-1.34 1.34-3.89 1.45-4.64 1.45-.75 0-3.3-.11-4.64-1.45a.49.49 0 1 1 .69-.69c1.01 1.01 3.03 1.15 3.95 1.15.92 0 2.94-.14 3.95-1.15a.49.49 0 1 1 .69.69zm-1.64-2.2c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
                 </a>
-                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(h1Title + " - " + targetFullUrl)}" target="_blank" class="btn-share btn-wa" title="Share on WhatsApp">
+                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(textOnlyH1Title + " - " + targetFullUrl)}" target="_blank" class="btn-share btn-wa" title="Share on WhatsApp">
                     <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-3.535l.393.233c1.492.886 3.16 1.353 4.964 1.354 5.542 0 10.051-4.51 10.054-10.055.002-2.686-1.043-5.212-2.943-7.114C17.156 2.98 14.634 1.932 11.95 1.932c-5.544 0-10.056 4.512-10.06 10.06-.001 1.83.479 3.619 1.392 5.147l.256.429-.998 3.645 3.73-.977zm11.314-5.174c-.312-.156-1.848-.912-2.126-1.013-.279-.102-.482-.156-.684.156-.202.311-.78.983-.956 1.186-.176.203-.352.228-.664.072-1.344-.672-2.219-1.161-3.111-2.692-.23-.396.23-.367.659-1.222.072-.145.036-.272-.018-.38-.055-.107-.482-1.16-.66-1.589-.173-.417-.348-.36-.482-.367-.124-.006-.266-.007-.408-.007-.141 0-.372.053-.567.266-.194.213-.744.727-.744 1.774 0 1.046.762 2.058.868 2.201.107.143 1.5 2.293 3.635 3.218.508.22 1.03.353 1.385.466.51.162.974.139 1.341.084.409-.061 1.848-.755 2.11-1.442.262-.688.262-1.277.184-1.392-.078-.115-.286-.17-.597-.327z"/></svg>
                 </a>
             </div>
         </section>
 
-        <center><script src="https://seribudollarperhari.github.io/banner/ad3.js"><\/script></center>
+        <center>${tagScript}https://seribudollarperhari.github.io/banner/ad3.js${tagClose}</center>
         
         <section class="related-posts-section">
             <h3>More Viral Stories</h3>
             <div id="related-posts-container" class="content-grid">
-                </div>
+                <!-- Related posts will be generated here -->
+            </div>
         </section>
 
         <div style="margin-top: 30px;">
-            <center><script src="https://seribudollarperhari.github.io/banner/nativ.js"><\/script></center>
+            <center>${tagScript}https://seribudollarperhari.github.io/banner/nativ.js${tagClose}</center>
         </div>
 
     </main>
@@ -432,7 +475,7 @@ function generateAndDownload() {
         <p>And select <strong>"Open in Browser"</strong> or <strong>"Open in Chrome/Safari"</strong>.</p>
     </div>
 
-    <script>
+    ${inlineScriptOpen}
         document.addEventListener("DOMContentLoaded", function() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
@@ -444,11 +487,11 @@ function generateAndDownload() {
                 }, 3000);
             }
         });
-    <\/script>
+    ${inlineScriptClose}
 
-    <script>
+    ${inlineScriptOpen}
         (function() {
-            const keyword = "${h1Title}";
+            const keyword = "${jsSafeTitle}";
             const displayed = new Set([keyword.toLowerCase()]);
             
             function generateRelated() {
@@ -490,7 +533,7 @@ function generateAndDownload() {
                 let count = 0;
                 
                 items.forEach(item => {
-                    if(count >= 6) return; // Load 6 related posts
+                    if(count >= 6) return;
                     
                     const termLower = item.toLowerCase();
                     if(displayed.has(termLower)) return;
@@ -498,7 +541,7 @@ function generateAndDownload() {
                     count++;
                     
                     const slug = item.replace(/\\s+/g, '-').toLowerCase();
-                    const linkUrl = '${baseDomain}' + slug + '.html'; // Bisa diganti sesuaikan dengan routing detail
+                    const linkUrl = '${baseDomain}detail.html?q=' + slug;
                     
                     const queryImg = item + " news viral";
                     const imgUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImg) + '&w=300&h=200&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
@@ -513,7 +556,7 @@ function generateAndDownload() {
 
             generateRelated();
         })();
-    <\/script>
+    ${inlineScriptClose}
 </body>
 </html>`;
 
